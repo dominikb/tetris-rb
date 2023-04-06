@@ -28,8 +28,8 @@ class Tetris
   end
 
   def stop!
-    @terminal.stop!
-    puts 'Stopped'
+    puts "Stopping..."
+    exit!
   end
 
   def print
@@ -42,7 +42,7 @@ class Tetris
     last_tick = Time.now
     loop do
       if @tick_now || (last_tick + @speed) < Time.now
-        next if @paused
+        next if @paused || @game_over
 
         handle_current_block!
         clear_lines!
@@ -59,10 +59,18 @@ class Tetris
 
   def heading
     <<~HEADING
-      Tetris: #{@paused ? 'Paused' : 'Running'} | Score: #{@score} | Speed: #{(0.5 / @speed).truncate(2)}
+      Tetris: #{game_status} | Score: #{@score} | Speed: #{(0.5 / @speed).truncate(2)}
       Press 'q' to quit, 'r' to reset, 'p' to pause
       #{'-' * (@width * 3)}
     HEADING
+  end
+
+  def game_status
+    case true
+    when @game_over then red('Game over')
+    when @paused then yellow('Paused')
+    else green('Running')
+    end
   end
 
   def board
@@ -80,8 +88,8 @@ class Tetris
     Blocks::ALL.sample.new.tap do |block|
       block.move_to!(@width / 2 - 1, @height)
 
-      if illegal_position?(block)
-        block.down! while illegal_position?(block)
+      if out_of_board_bounds?(block)
+        block.down! while out_of_board_bounds?(block)
       end
     end
   end
@@ -95,6 +103,7 @@ class Tetris
       @fallen_blocks[y][x] = @current_block.color
     end
     @current_block = spawn_block
+    @game_over = true if illegal_position?(@current_block)
   end
 
   def render_current_block!
@@ -147,6 +156,7 @@ class Tetris
     @fallen_blocks = @board.dup
     @speed = 0.5
     @score = 0
+    @game_over = false
     @paused = false
     @current_block = spawn_block
   end
@@ -178,7 +188,7 @@ class Tetris
     end
 
     return unless @paused || illegal_position?(@current_block)
-    @current_block = prev_block
 
+    @current_block = prev_block
   end
 end

@@ -1,6 +1,8 @@
 # Tetris-rb
 
-Tetris game playable in console. Has support for ANSI colors.
+Tetris game playable in console.
+
+![](assets/gameplay-recording.gif)
 
 ## Run the game
 

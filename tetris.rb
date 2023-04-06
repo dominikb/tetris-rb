@@ -3,6 +3,6 @@ require_relative 'lib/terminal'
 
 if __FILE__  == $0
   terminal = Terminal.new
-  tetris = Tetris.new(terminal, 8)
+  tetris = Tetris.new(terminal)
   tetris.run
 end
